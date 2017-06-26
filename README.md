@@ -104,3 +104,89 @@ app.listen( process.env.PORT || 4000);
 // Get mongodb client
 var MongoClient = mongodb.MongoClient;
 ```
+
+## Insert new todos into database and read existing
+
+* server.js: add the following handler code
+
+``` javascript
+// Handler for /todos GET
+app.get("/todos", function(req, res){
+  MongoClient.connect(url, function(err, db) {
+    assert.equal(null, err);
+    // Get the collection
+    var col = db.collection('todos');
+    col.find({}).toArray(function(err, docs) {
+        res.send(docs);
+        db.close();
+      });
+  });
+});
+
+// Handler for POST /todo
+app.post("/todo", function(req, res){
+  MongoClient.connect(url, function(err, db) {
+    var col = db.collection('todos');
+    col.insertOne(req.body.todo, function(err, r) {
+      assert.equal(null, err);
+      // Return full set of documents (for simplicity reasons)
+      col.find().toArray(function(err, docs) {
+          res.send(docs);
+          db.close();
+      });
+    });
+  });
+});
+```
+
+* App.controller.js: update the following code blocks
+
+``` javascript
+addTodo: function() {
+  var oModel = this.getView().getModel();
+  var aTodos = oModel.getObject('/todos');
+  var newTodo = {
+    title: oModel.getProperty('/newTodo'),
+    completed: false
+  };
+  aTodos.push(newTodo);
+  // Update backend data
+  var that = this;
+  jQuery.ajax({
+              method : "POST",
+              url : "/todo/",
+              data: {todo:newTodo}
+  }).done(function(msg){
+    var aTodos = JSON.parse(msg);
+    aTodos = that.convertCompleted(aTodos);
+    oModel.setProperty("/todos", aTodos);
+  });
+
+  oModel.setProperty('/newTodo', '');
+},
+```
+
+* App.controller.js: Update also the following blocks
+
+``` javascript
+onInit: function(){
+  var that = this;
+  $.ajax({
+    url: "/todos"
+  })
+  .done(function( aTodos ) {
+    // Need to convert the type of "completed" back to boolean
+    aTodos = that.convertCompleted(aTodos);
+    that.getOwnerComponent().getModel().setProperty("/todos", aTodos);
+  });
+},
+
+convertCompleted: function(aTodos){
+  aTodos = aTodos.map(function(todo){
+    var oTodo = todo;
+    oTodo.completed = JSON.parse(todo.completed);
+    return oTodo;
+  });
+  return aTodos;
+}
+```

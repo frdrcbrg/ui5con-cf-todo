@@ -19,3 +19,31 @@ app.listen( process.env.PORT || 4000);
 
 // Get mongodb client
 var MongoClient = mongodb.MongoClient;
+
+// Handler for /todos GET
+app.get("/todos", function(req, res){
+  MongoClient.connect(url, function(err, db) {
+    assert.equal(null, err);
+    // Get the collection
+    var col = db.collection('todos');
+    col.find({}).toArray(function(err, docs) {
+        res.send(docs);
+        db.close();
+      });
+  });
+});
+
+// Handler for POST /todo
+app.post("/todo", function(req, res){
+  MongoClient.connect(url, function(err, db) {
+    var col = db.collection('todos');
+    col.insertOne(req.body.todo, function(err, r) {
+      assert.equal(null, err);
+      // Return full set of documents (for simplicity reasons)
+      col.find().toArray(function(err, docs) {
+          res.send(docs);
+          db.close();
+      });
+    });
+  });
+});

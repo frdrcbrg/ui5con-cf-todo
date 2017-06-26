@@ -12,16 +12,27 @@ sap.ui.define([
 		 * Adds a new to-do item to the bottom of the list.
 		 */
 		addTodo: function() {
-			var oModel = this.getView().getModel();
-			var aTodos = oModel.getObject('/todos');
-			var newTodo = {
-				title: oModel.getProperty('/newTodo'),
-				completed: false
-			};
-			aTodos.push(newTodo);
-			oModel.setProperty("/todos", aTodos);
-			oModel.setProperty('/newTodo', '');
-		},
+ 			var oModel = this.getView().getModel();
+ 			var aTodos = oModel.getObject('/todos');
+ 			var newTodo = {
+ 				title: oModel.getProperty('/newTodo'),
+ 				completed: false
+ 			};
+ 			aTodos.push(newTodo);
+ 			// Update backend data
+ 			var that = this;
+ 			jQuery.ajax({
+ 			            method : "POST",
+ 			            url : "/todo/",
+ 			            data: {todo:newTodo}
+ 			}).done(function(msg){
+ 				var aTodos = JSON.parse(msg);
+ 				aTodos = that.convertCompleted(aTodos);
+ 				oModel.setProperty("/todos", aTodos);
+ 			});
+
+ 			oModel.setProperty('/newTodo', '');
+ 		},
 
 		/**
 		 * Marks an item in the to-do-list as completed.
@@ -84,7 +95,24 @@ sap.ui.define([
 		},
 
 		onInit: function(){
+			var that = this;
+			$.ajax({
+				url: "/todos"
+			})
+			.done(function( aTodos ) {
+				// Need to convert the type of "completed" back to boolean
+				aTodos = that.convertCompleted(aTodos);
+				that.getOwnerComponent().getModel().setProperty("/todos", aTodos);
+			});
+		},
 
+		convertCompleted: function(aTodos){
+			aTodos = aTodos.map(function(todo){
+				var oTodo = todo;
+				oTodo.completed = JSON.parse(todo.completed);
+				return oTodo;
+			});
+			return aTodos;
 		}
 
 	});
