@@ -242,3 +242,53 @@ handleChange: function(oEvt) {
   })
 },
 ```
+
+## Add delete handler for todos
+
+* server.js
+
+``` javascript
+// Setup handler for /todos DELETE
+app.delete("/todos", function(req, res){
+  var todosDelete = [];
+
+  req.body.todos.forEach(function(todo){
+      todosDelete.push(objectId(todo._id));
+  });
+
+  MongoClient.connect(url, function(err, db) {
+    assert.equal(null, err);
+    // Get the collection
+    var col = db.collection('todos');
+    col.deleteMany({'_id':{'$in': todosDelete}},function(err, result) {
+      assert.equal(null, err);
+      res.send(result);
+      db.close();
+    });
+  });
+});
+```
+
+* App.controller.js
+
+``` javascript
+clearCompleted: function(oEvt) {
+  var aTodos = this.getView().getModel().getObject('/todos');
+  var aTodosForDeletion = [];
+  var i = aTodos.length;
+  while (i--) {
+    var oTodo = aTodos[i];
+    if (oTodo.completed) {
+      aTodosForDeletion.push(oTodo);
+      aTodos.splice(i, 1)
+    }
+  }
+  // Persist deletion via REST service
+  jQuery.ajax({
+              method : "DELETE",
+              url : "/todos/",
+              data: {todos:aTodosForDeletion}
+  });
+  this._updateCompletedCount(0);
+},
+```

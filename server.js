@@ -47,3 +47,45 @@ app.post("/todo", function(req, res){
     });
   });
 });
+
+// Handler for PUT /todo
+app.put("/todo", function(req, res){
+  MongoClient.connect(url, function(err, db) {
+    var col = db.collection('todos');
+    console.log(req.body.todo);
+    var id = objectId(req.body.todo._id);
+    var oTodo = {
+      title:req.body.todo.title,
+      completed:req.body.todo.completed
+    };
+    console.log("ID: " + id + ", oTodo: " + oTodo);
+      col.updateOne({'_id':id}, {$set:oTodo}, function(err, result) {
+      assert.equal(null, err);
+      // Return full set of documents (for simplicity reasons)
+      col.find().toArray(function(err, docs) {
+          res.send(JSON.stringify(docs));
+          db.close();
+      });
+    });
+  });
+});
+
+// Setup handler for /todos DELETE
+app.delete("/todos", function(req, res){
+  var todosDelete = [];
+
+  req.body.todos.forEach(function(todo){
+      todosDelete.push(objectId(todo._id));
+  });
+
+  MongoClient.connect(url, function(err, db) {
+    assert.equal(null, err);
+    // Get the collection
+    var col = db.collection('todos');
+    col.deleteMany({'_id':{'$in': todosDelete}},function(err, result) {
+      assert.equal(null, err);
+      res.send(result);
+      db.close();
+    });
+  });
+});

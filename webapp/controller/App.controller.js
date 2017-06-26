@@ -63,17 +63,25 @@ sap.ui.define([
 		 * Removes all completed items from the to-do list.
 		 * @param {Object} oEvt - Button pressed event.
 		 */
-		clearCompleted: function(oEvt) {
-			var aTodos = this.getView().getModel().getObject('/todos');
-			var i = aTodos.length;
-			while (i--) {
-				var oTodo = aTodos[i];
-				if (oTodo.completed) {
-					aTodos.splice(i, 1)
-				}
-			}
-			this._updateCompletedCount(0);
-		},
+		 clearCompleted: function(oEvt) {
+ 			var aTodos = this.getView().getModel().getObject('/todos');
+ 			var aTodosForDeletion = [];
+ 			var i = aTodos.length;
+ 			while (i--) {
+ 				var oTodo = aTodos[i];
+ 				if (oTodo.completed) {
+ 					aTodosForDeletion.push(oTodo);
+ 					aTodos.splice(i, 1)
+ 				}
+ 			}
+ 			// Persist deletion via REST service
+ 			jQuery.ajax({
+ 			            method : "DELETE",
+ 			            url : "/todos/",
+ 			            data: {todos:aTodosForDeletion}
+ 			});
+ 			this._updateCompletedCount(0);
+ 		},
 
 		_updateCompletedCount: function(iCount) {
 			var oModel = this.getView().getModel();
