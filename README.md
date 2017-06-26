@@ -50,3 +50,15 @@ applications:
 ```
 cf push
 ```
+
+Copy the resulting URL and open it in your browser (something like ui5con-cf-todo-<somestring>.cfapps.eu10.hana.ondemand.com). The application should load in your browser.
+
+## Add service subscription to your deployed application
+
+* Navigate to your application and subscribe to the mongodb backing service
+
+Find your application in your org and space, go to the navigation option for "Service Bindings"
+
+Click on the button "Bind Service" and select "Service from the catalog". Next.
+
+Select "MongoDB". Next. "Create new instance", instance name "mongo". Next and finish.
