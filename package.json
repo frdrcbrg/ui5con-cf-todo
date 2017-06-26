@@ -1,0 +1,12 @@
+{
+  "name": "ui5con-cf-todo",
+  "version": "0.1.0",
+  "description": "Sample of an OpenUI5 app on Cloud Foundry",
+  "private": true,
+  "scripts": {
+
+  },
+  "dependencies":{
+    "express":"*"
+  }
+}
