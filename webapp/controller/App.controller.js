@@ -38,15 +38,26 @@ sap.ui.define([
 		 * Marks an item in the to-do-list as completed.
 		 * @param {Object} oEvt - List item selected event.
 		 */
-		toggleCompleted: function(oEvt) {
-			var iCount = this.getView().getModel().getProperty('/completedCount');
-			var iModification = oEvt.getParameters().selected ? 1 : -1;
-			this._updateCompletedCount(iCount + iModification);
-		},
+		 toggleCompleted: function(oEvt) {
+		   var iCount = this.getView().getModel().getProperty('/completedCount');
+		   var iModification = oEvt.getParameters().selected ? 1 : -1;
+		   this._updateCompletedCount(iCount + iModification);
+		   var oTodo = oEvt.getParameter("listItem").getBindingContext().getProperty();
+		   jQuery.ajax({
+		               method : "PUT",
+		               url : "/todo/",
+		               data: {todo:oTodo}
+		   })
+		 },
 
-		handleChange: function(oEvt) {
-
-		},
+		 handleChange: function(oEvt) {
+		   var oTodo = oEvt.oSource.getBindingContext().getProperty();
+		   jQuery.ajax({
+		               method : "PUT",
+		               url : "/todo/",
+		               data: {todo:oTodo}
+		   })
+		 },
 
 		/**
 		 * Removes all completed items from the to-do list.

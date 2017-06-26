@@ -190,3 +190,55 @@ convertCompleted: function(aTodos){
   return aTodos;
 }
 ```
+
+## Add change handler for todos
+
+* server.js: add following handlers
+
+``` javascript
+// Handler for PUT /todo
+app.put("/todo", function(req, res){
+  MongoClient.connect(url, function(err, db) {
+    var col = db.collection('todos');
+    var id = objectId(req.body.todo._id);
+    var oTodo = {
+      title:req.body.todo.title,
+      completed:req.body.todo.completed
+    };
+    console.log("ID: " + id + ", oTodo: " + oTodo);
+      col.updateOne({'_id':id}, {$set:oTodo}, function(err, result) {
+      assert.equal(null, err);
+      // Return full set of documents (for simplicity reasons)
+      col.find().toArray(function(err, docs) {
+          res.send(docs);
+          db.close();
+      });
+    });
+  });
+});
+```
+
+* App.controller.js: Update
+
+``` javascript
+toggleCompleted: function(oEvt) {
+  var iCount = this.getView().getModel().getProperty('/completedCount');
+  var iModification = oEvt.getParameters().selected ? 1 : -1;
+  this._updateCompletedCount(iCount + iModification);
+  var oTodo = oEvt.getParameter("listItem").getBindingContext().getProperty();
+  jQuery.ajax({
+              method : "PUT",
+              url : "/todo/",
+              data: {todo:oTodo}
+  })
+},
+
+handleChange: function(oEvt) {
+  var oTodo = oEvt.oSource.getBindingContext().getProperty();
+  jQuery.ajax({
+              method : "PUT",
+              url : "/todo/",
+              data: {todo:oTodo}
+  })
+},
+```
