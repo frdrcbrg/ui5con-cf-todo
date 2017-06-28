@@ -53,6 +53,28 @@ cf push
 
 Copy the resulting URL and open it in your browser (something like ui5con-cf-todo-<somestring>.cfapps.eu10.hana.ondemand.com). The application should load in your browser.
 
+
+## Cloud Foundry specific commands
+
+https://docs.cloudfoundry.org/devguide/deploy-apps/deploy-app.html
+
+```
+cf push
+```
+
+https://docs.cloudfoundry.org/devguide/deploy-apps/cf-scale.html
+
+```
+cf scale ui5con-cf-todo -i 4
+```
+
+https://docs.cloudfoundry.org/devguide/services/managing-services.html
+
+```
+cf marketplace
+```
+
+
 ## Add service subscription to your deployed application
 
 * Navigate to your application and subscribe to the mongodb backing service
