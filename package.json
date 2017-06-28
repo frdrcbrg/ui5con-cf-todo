@@ -7,9 +7,6 @@
 
   },
   "dependencies":{
-    "express":"*",
-    "body-parser":"*",
-    "mongodb": "*",
-    "assert":"*"
+    "express":"*"
   }
 }

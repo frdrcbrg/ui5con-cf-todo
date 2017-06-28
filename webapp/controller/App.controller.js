@@ -12,76 +12,46 @@ sap.ui.define([
 		 * Adds a new to-do item to the bottom of the list.
 		 */
 		addTodo: function() {
- 			var oModel = this.getView().getModel();
- 			var aTodos = oModel.getObject('/todos');
- 			var newTodo = {
- 				title: oModel.getProperty('/newTodo'),
- 				completed: false
- 			};
- 			aTodos.push(newTodo);
- 			// Update backend data
- 			var that = this;
- 			jQuery.ajax({
- 			            method : "POST",
- 			            url : "/todo/",
- 			            data: {todo:newTodo}
- 			}).done(function(msg){
- 				var aTodos = JSON.parse(msg);
- 				aTodos = that.convertCompleted(aTodos);
- 				oModel.setProperty("/todos", aTodos);
- 			});
-
- 			oModel.setProperty('/newTodo', '');
- 		},
+			var oModel = this.getView().getModel();
+			var aTodos = oModel.getObject('/todos');
+			var newTodo = {
+				title: oModel.getProperty('/newTodo'),
+				completed: false
+			};
+			aTodos.push(newTodo);
+			oModel.setProperty("/todos", aTodos);
+			oModel.setProperty('/newTodo', '');
+		},
 
 		/**
 		 * Marks an item in the to-do-list as completed.
 		 * @param {Object} oEvt - List item selected event.
 		 */
-		 toggleCompleted: function(oEvt) {
-		   var iCount = this.getView().getModel().getProperty('/completedCount');
-		   var iModification = oEvt.getParameters().selected ? 1 : -1;
-		   this._updateCompletedCount(iCount + iModification);
-		   var oTodo = oEvt.getParameter("listItem").getBindingContext().getProperty();
-		   jQuery.ajax({
-		               method : "PUT",
-		               url : "/todo/",
-		               data: {todo:oTodo}
-		   })
-		 },
+		toggleCompleted: function(oEvt) {
+			var iCount = this.getView().getModel().getProperty('/completedCount');
+			var iModification = oEvt.getParameters().selected ? 1 : -1;
+			this._updateCompletedCount(iCount + iModification);
+		},
 
-		 handleChange: function(oEvt) {
-		   var oTodo = oEvt.oSource.getBindingContext().getProperty();
-		   jQuery.ajax({
-		               method : "PUT",
-		               url : "/todo/",
-		               data: {todo:oTodo}
-		   })
-		 },
+		handleChange: function(oEvt) {
+
+		},
 
 		/**
 		 * Removes all completed items from the to-do list.
 		 * @param {Object} oEvt - Button pressed event.
 		 */
-		 clearCompleted: function(oEvt) {
- 			var aTodos = this.getView().getModel().getObject('/todos');
- 			var aTodosForDeletion = [];
- 			var i = aTodos.length;
- 			while (i--) {
- 				var oTodo = aTodos[i];
- 				if (oTodo.completed) {
- 					aTodosForDeletion.push(oTodo);
- 					aTodos.splice(i, 1)
- 				}
- 			}
- 			// Persist deletion via REST service
- 			jQuery.ajax({
- 			            method : "DELETE",
- 			            url : "/todos/",
- 			            data: {todos:aTodosForDeletion}
- 			});
- 			this._updateCompletedCount(0);
- 		},
+		clearCompleted: function(oEvt) {
+			var aTodos = this.getView().getModel().getObject('/todos');
+			var i = aTodos.length;
+			while (i--) {
+				var oTodo = aTodos[i];
+				if (oTodo.completed) {
+					aTodos.splice(i, 1)
+				}
+			}
+			this._updateCompletedCount(0);
+		},
 
 		_updateCompletedCount: function(iCount) {
 			var oModel = this.getView().getModel();
@@ -114,24 +84,7 @@ sap.ui.define([
 		},
 
 		onInit: function(){
-			var that = this;
-			$.ajax({
-				url: "/todos"
-			})
-			.done(function( aTodos ) {
-				// Need to convert the type of "completed" back to boolean
-				aTodos = that.convertCompleted(aTodos);
-				that.getOwnerComponent().getModel().setProperty("/todos", aTodos);
-			});
-		},
 
-		convertCompleted: function(aTodos){
-			aTodos = aTodos.map(function(todo){
-				var oTodo = todo;
-				oTodo.completed = JSON.parse(todo.completed);
-				return oTodo;
-			});
-			return aTodos;
 		}
 
 	});

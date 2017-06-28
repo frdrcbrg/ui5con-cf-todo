@@ -1,8 +1,0 @@
----
-applications:
-- name: ui5con-cf-todo
-  memory: 100M
-  instances: 1
-  random-route: true
-  buildpack: nodejs_buildpack
-  command: node server.js
