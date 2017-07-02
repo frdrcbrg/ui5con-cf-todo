@@ -89,6 +89,14 @@ Select "MongoDB". Next. "Create new instance", instance name "mongo". Next and f
 
 You have now successfully added a backing service to your cf application.
 
+## Install mongodb for local tests (optional)
+
+Follow the instructions at:
+
+https://docs.mongodb.com/manual/administration/install-community/
+
+to get a local instance of MongoDB running.
+
 ## Setup mongodb and connect to server
 
 * package.json: Add the following dependencies
@@ -110,11 +118,16 @@ var bodyParser = require('body-parser');
 var mongodb = require('mongodb');
 var assert = require('assert');
 var objectId = require('mongodb').ObjectID;
+var url = '';
 
-// // Get environmental credentials
-var vcap_services = process.env.VCAP_SERVICES;
-var mongodb_service = JSON.parse(vcap_services).mongodb[0];
-var url = mongodb_service.credentials.uri;
+// Get MongoDB connection from environmental or use local MongoDB instance
+if(process.env.VCAP_SERVICES) {
+    var vcap_services = process.env.VCAP_SERVICES;
+    var mongodb_service = JSON.parse(vcap_services).mongodb[0];
+    url = mongodb_service.credentials.uri;	
+} else {
+    url = 'mongodb://localhost:27017/todo';	
+}
 
 // Create express app to serve application
 var app = express();
